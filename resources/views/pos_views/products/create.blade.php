@@ -137,58 +137,59 @@
     </div>
 
     <!-- Variation Template -->
-   <!-- Variation Template (hidden div instead of template tag) -->
-<div id="variation-template" class="d-none">
-    <div class="variation-row">
-        <div class="row">
-            <div class="col-md-12 mb-2">
-                <h5>Variation <span class="variation-number"></span></h5>
-                <button type="button" class="btn btn-sm btn-danger remove-variation float-end">
-                    <i class="fas fa-times"></i> Remove
-                </button>
+    <!-- Variation Template (hidden div instead of template tag) -->
+    <div id="variation-template" class="d-none">
+        <div class="variation-row">
+            <div class="row">
+                <div class="col-md-12 mb-2">
+                    <h5>Variation <span class="variation-number"></span></h5>
+                    <button type="button" class="btn btn-sm btn-danger remove-variation float-end">
+                        <i class="fas fa-times"></i> Remove
+                    </button>
+                </div>
             </div>
-        </div>
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <div class="mb-3 attributes-container">
-                    <label class="form-label">Variation Attributes <span class="text-danger">*</span></label>
-                    <div class="attribute-pair mb-2">
-                        <div class="input-group">
-                            <input type="text" class="form-control attribute-key"
-                                name="variations[{index}][attributes][key][]" placeholder="e.g. Color" required>
-                            <span class="input-group-text">:</span>
-                            <input type="text" class="form-control attribute-value"
-                                name="variations[{index}][attributes][value][]" placeholder="e.g. Red" required>
-                            <button type="button" class="btn btn-outline-success add-attribute">
-                                <i class="fas fa-plus"></i>
-                            </button>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="mb-3 attributes-container">
+                        <label class="form-label">Variation Attributes <span class="text-danger">*</span></label>
+                        <div class="attribute-pair mb-2">
+                            <div class="input-group">
+                                <input type="text" class="form-control attribute-key"
+                                    name="variations[{index}][attributes][key][]" placeholder="e.g. name" required>
+                                <span class="input-group-text">:</span>
+                                <input type="text" class="form-control attribute-value"
+                                    name="variations[{index}][attributes][value][]" placeholder="e.g. value" required>
+                                <button type="button" class="btn btn-outline-success add-attribute">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-2">
-                <div class="mb-3">
-                    <label class="form-label">Purchase Price <span class="text-danger">*</span></label>
-                    <input type="number" step="0.01" class="form-control"
-                        name="variations[{index}][purchase_price]" required>
+                <div class="col-md-2">
+                    <div class="mb-3">
+                        <label class="form-label">Purchase Price <span class="text-danger">*</span></label>
+                        <input type="number" step="0.01" class="form-control"
+                            name="variations[{index}][purchase_price]" required>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-2">
-                <div class="mb-3">
-                    <label class="form-label">Selling Price <span class="text-danger">*</span></label>
-                    <input type="number" step="0.01" class="form-control"
-                        name="variations[{index}][selling_price]" required>
+                <div class="col-md-2">
+                    <div class="mb-3">
+                        <label class="form-label">Selling Price <span class="text-danger">*</span></label>
+                        <input type="number" step="0.01" class="form-control"
+                            name="variations[{index}][selling_price]" required>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-2">
-                <div class="mb-3">
-                    <label class="form-label">Stock</label>
-                    <input type="number" class="form-control" name="variations[{index}][stock]" value="0" min="0">
+                <div class="col-md-2">
+                    <div class="mb-3">
+                        <label class="form-label">Stock</label>
+                        <input type="number" class="form-control" name="variations[{index}][stock]" value="0"
+                            min="0">
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
 @endsection
 

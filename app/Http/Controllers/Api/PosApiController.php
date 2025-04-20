@@ -21,7 +21,7 @@ class PosApiController extends Controller
             });
         }
         
-        $products = $query->latest()->paginate(2);
+        $products = $query->latest()->paginate(15);
         
         return response()->json($products);
     }

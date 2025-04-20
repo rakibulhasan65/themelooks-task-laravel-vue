@@ -1,15 +1,15 @@
 <template>
     <div class="container">
         <!-- Main POS Layout -->
-         <div v-if="orderSuccessMessage" class="alert alert-success mb-3 p-3">
-                Order placed successfully!
-            </div>
+        <div v-if="orderSuccessMessage" class="alert alert-success mb-3 p-3">
+            Order placed successfully!
+        </div>
         <div class="pos-wrapper">
             <!-- Products Section -->
-            
+
             <section class="product-section">
-                 <!-- order success message -->
-            
+                <!-- order success message -->
+
                 <div class="section-header">
                     <h2>Product List</h2>
                 </div>
@@ -37,8 +37,19 @@
                         </div>
                         <div class="product-info">
                             <h3 class="product-name">{{ product.name }}</h3>
+                            <div class="">
+                                <!-- discountPrice -->
+                                <span v-if="product.discount > 0"
+                                    >${{ discountPrice(product) }}</span
+                                >
+                            </div>
                             <p class="product-price">
-                                ৳{{ product.selling_price }}
+                                <span
+                                    v-if="product.discount > 0"
+                                    class="text-muted text-decoration-line-through"
+                                    >${{ product.selling_price }}</span
+                                >
+                                <span v-else>${{ product.selling_price }}</span>
                             </p>
                             <button
                                 class="btn btn-primary btn-block"
@@ -79,14 +90,14 @@
                             <div class="item-details">
                                 <div class="item-name">{{ item.name }}</div>
                                 <div class="item-price">
-                                    {{ item.quantity }} × ৳{{
+                                    {{ item.quantity }} × ${{
                                         item.selling_price
                                     }}
                                 </div>
                             </div>
                             <div class="item-actions">
                                 <div class="item-total">
-                                    ৳{{ totalPrice(item) }}
+                                    ${{ totalPrice(item) }}
                                 </div>
                                 <div class="item-quantity">
                                     <button
@@ -125,17 +136,17 @@
 
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="text-muted">Subtotal:</span>
-                                <strong>৳{{ subtotalPrice }}</strong>
+                                <strong>${{ subtotalPrice }}</strong>
                             </div>
 
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="text-muted">Tax:</span>
-                                <strong>৳{{ totalTax }}</strong>
+                                <strong>${{ totalTax }}</strong>
                             </div>
 
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="text-muted">Discount:</span>
-                                <strong>৳{{ totalDiscount }}</strong>
+                                <strong>${{ totalDiscount }}</strong>
                             </div>
 
                             <hr />
@@ -143,7 +154,7 @@
                             <div class="d-flex justify-content-between mb-3">
                                 <span class="h6">Total:</span>
                                 <span class="h6 text-success"
-                                    >৳{{ grandTotal }}</span
+                                    >${{ grandTotal }}</span
                                 >
                             </div>
 
@@ -172,41 +183,71 @@ const cartItems = ref([]);
 const customerName = ref("");
 const customerPhone = ref("");
 const orderSuccessMessage = ref(false);
+const discountPrice = (product) => {
+    const price = parseFloat(product.selling_price) || 0;
+    const discount = parseFloat(product.discount) || 0;
+    return (price - (price * discount) / 100).toFixed(2);
+};
 
 const totalPrice = (item) => {
-    // Calculate the subtotal price of all items in the cart
     const price = parseFloat(item.selling_price) || 0;
-    const tax = parseFloat(item.tax) || 0;
-    const discount = parseFloat(item.discount) || 0;
+    const taxPercent = parseFloat(item.tax) || 0;
+    const discountPercent = parseFloat(item.discount) || 0;
     const quantity = parseInt(item.quantity) || 1;
 
-    return price * quantity + tax - discount;
+    const priceAfterDiscount = price - (price * discountPercent) / 100;
+    const priceAfterTax =
+        priceAfterDiscount + (priceAfterDiscount * taxPercent) / 100;
+
+    return (priceAfterTax * quantity).toFixed(2);
 };
 
 const subtotalPrice = computed(() => {
-    return cartItems.value.reduce((total, item) => {
-        const price = parseFloat(item.selling_price) || 0;
-        const quantity = parseInt(item.quantity) || 1;
-        return total + price * quantity;
-    }, 0);
+    return cartItems.value
+        .reduce((total, item) => {
+            const price = parseFloat(item.selling_price) || 0;
+            const quantity = parseInt(item.quantity) || 1;
+            return total + price * quantity;
+        }, 0)
+        .toFixed(2);
 });
 
 const totalTax = computed(() => {
-    return cartItems.value.reduce((total, item) => {
-        return total + (parseFloat(item.tax) || 0);
-    }, 0);
+    return cartItems.value
+        .reduce((total, item) => {
+            const price = parseFloat(item.selling_price) || 0;
+            const quantity = parseInt(item.quantity) || 1;
+            const discount = parseFloat(item.discount) || 0;
+            const tax = parseFloat(item.tax) || 0;
+
+            const priceAfterDiscount = price - (price * discount) / 100;
+            const taxAmount = (priceAfterDiscount * tax) / 100;
+
+            return total + taxAmount * quantity;
+        }, 0)
+        .toFixed(2);
 });
 
 const totalDiscount = computed(() => {
-    return cartItems.value.reduce((total, item) => {
-        return total + (parseFloat(item.discount) || 0);
-    }, 0);
+    return cartItems.value
+        .reduce((total, item) => {
+            const price = parseFloat(item.selling_price) || 0;
+            const quantity = parseInt(item.quantity) || 1;
+            const discount = parseFloat(item.discount) || 0;
+
+            const discountAmount = (price * discount) / 100;
+
+            return total + discountAmount * quantity;
+        }, 0)
+        .toFixed(2);
 });
 
 const grandTotal = computed(() => {
-    return cartItems.value.reduce((total, item) => {
-        return total + totalPrice(item);
-    }, 0);
+    return (
+        parseFloat(subtotalPrice.value) +
+        parseFloat(totalTax.value) -
+        parseFloat(totalDiscount.value)
+    ).toFixed(2);
 });
 
 const quantityIncrement = (item) => {
