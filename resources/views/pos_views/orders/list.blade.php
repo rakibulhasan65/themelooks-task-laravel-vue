@@ -75,9 +75,9 @@
                                     <td>${{ number_format($order->discount, 2) }}</td>
                                     <td class="fw-bold">${{ number_format($order->total, 2) }}</td>
                                     <td>
-                                        <a href="{{ route('orders.show', $order->id) }}" class="btn btn-sm btn-info">
+                                        {{-- <a href="{{ route('orders.show', $order->id) }}" class="btn btn-sm btn-info">
                                             <i class="fas fa-eye"></i>
-                                        </a>
+                                        </a> --}}
                                     </td>
                                 </tr>
                             @empty

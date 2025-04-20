@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class OrderController extends Controller
 {
@@ -26,6 +27,7 @@ class OrderController extends Controller
 
     public function store(Request $request)
     {
+        // dd($request->all());
         $validator = Validator::make($request->all(), [
             'items' => 'required|array',
             'items.*.product_id' => 'required|exists:products,id',
@@ -65,9 +67,9 @@ class OrderController extends Controller
         ]);
     }
 
-    public function show($id)
-    {
-        $order = Order::findOrFail($id);
-        return view('pos_views.orders.show', compact('order'));
-    }
+    // public function show($id)
+    // {
+    //     $order = Order::findOrFail($id);
+    //     return view('pos_views.orders.show', compact('order'));
+    // }
 }

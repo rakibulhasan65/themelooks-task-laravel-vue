@@ -27,14 +27,17 @@
                         :key="product.id"
                     >
                         <div class="product-image">
-                            <img :src="product.image" alt="Organic Apples" />
+                            <img :src="product.image" :alt="product.name" />
                         </div>
                         <div class="product-info">
                             <h3 class="product-name">{{ product.name }}</h3>
                             <p class="product-price">
                                 ৳{{ product.selling_price }}
                             </p>
-                            <button class="btn btn-primary btn-block">
+                            <button
+                                class="btn btn-primary btn-block"
+                                @click="addToCart(product)"
+                            >
                                 Add to Cart
                             </button>
                         </div>
@@ -60,46 +63,92 @@
                 </div>
 
                 <div class="cart-container">
-                    <div class="cart-items">
+                    <div class="cart-items" v-if="cartItems.length">
                         <!-- Sample Cart Items -->
-                        <div class="cart-item">
+                        <div
+                            class="cart-item"
+                            v-for="item in cartItems"
+                            :key="item.id"
+                        >
                             <div class="item-details">
-                                <div class="item-name">Organic Apples</div>
-                                <div class="item-price">2 × ৳120.00</div>
+                                <div class="item-name">{{ item.name }}</div>
+                                <div class="item-price">
+                                    {{ item.quantity }} × ৳{{
+                                        item.selling_price
+                                    }}
+                                </div>
                             </div>
                             <div class="item-actions">
-                                <div class="item-total">৳240.00</div>
+                                <div class="item-total">
+                                    ৳{{ totalPrice(item) }}
+                                </div>
                                 <div class="item-quantity">
                                     <button
                                         class="btn btn-danger btn-sm quantity-btn"
+                                        @click="quantityDecrement(item)"
                                     >
                                         -
                                     </button>
-                                    <span class="quantity-value">2</span>
+                                    <span
+                                        class="quantity-value"
+                                        v-text="item.quantity"
+                                    ></span>
                                     <button
                                         class="btn btn-success btn-sm quantity-btn"
+                                        @click="quantityIncrement(item)"
                                     >
                                         +
                                     </button>
                                 </div>
+                                <button
+                                    class="btn btn-danger btn-sm rounded-circle"
+                                    @click="removeItem(item)"
+                                >
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
                             </div>
                         </div>
-
-                        <!-- If cart is empty, show this instead -->
-
-                        <div class="empty-cart">
-                            <p>Your cart is empty</p>
-                        </div>
+                    </div>
+                    <div class="empty-cart" v-else>
+                        <p>Your cart is empty</p>
                     </div>
 
-                    <div class="cart-summary">
-                        <div class="cart-total">
-                            <span class="total-label">Total:</span>
-                            <span class="total-value">৳545.50</span>
+                    <div class="mt-4 p-3">
+                        <div class="">
+                            <h5 class="card-title mb-3">Cart Summary</h5>
+
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Subtotal:</span>
+                                <strong>৳{{ subtotalPrice }}</strong>
+                            </div>
+
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Tax:</span>
+                                <strong>৳{{ totalTax }}</strong>
+                            </div>
+
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Discount:</span>
+                                <strong>৳{{ totalDiscount }}</strong>
+                            </div>
+
+                            <hr />
+
+                            <div class="d-flex justify-content-between mb-3">
+                                <span class="h6">Total:</span>
+                                <span class="h6 text-success"
+                                    >৳{{ grandTotal }}</span
+                                >
+                            </div>
+
+                            <button
+                                class="btn btn-success w-100"
+                                @click="placeOrder"
+                            >
+                                <i class="fa-solid fa-check"></i>
+                                Place Order
+                            </button>
                         </div>
-                        <button class="btn btn-success btn-block">
-                            Place Order
-                        </button>
                     </div>
                 </div>
             </section>
@@ -108,22 +157,87 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from "vue";
+import { ref, watch, computed, onMounted } from "vue";
 
 const products = ref([]);
 const searchQuery = ref("");
 const currentPage = ref(1);
+const cartItems = ref([]);
+const customerName = ref("");
+const customerPhone = ref("");
+
+const totalPrice = (item) => {
+    // Calculate the subtotal price of all items in the cart
+    const price = parseFloat(item.selling_price) || 0;
+    const tax = parseFloat(item.tax) || 0;
+    const discount = parseFloat(item.discount) || 0;
+    const quantity = parseInt(item.quantity) || 1;
+
+    return price * quantity + tax - discount;
+};
+
+const subtotalPrice = computed(() => {
+    return cartItems.value.reduce((total, item) => {
+        const price = parseFloat(item.selling_price) || 0;
+        const quantity = parseInt(item.quantity) || 1;
+        return total + price * quantity;
+    }, 0);
+});
+
+const totalTax = computed(() => {
+    return cartItems.value.reduce((total, item) => {
+        return total + (parseFloat(item.tax) || 0);
+    }, 0);
+});
+
+const totalDiscount = computed(() => {
+    return cartItems.value.reduce((total, item) => {
+        return total + (parseFloat(item.discount) || 0);
+    }, 0);
+});
+
+const grandTotal = computed(() => {
+    return cartItems.value.reduce((total, item) => {
+        return total + totalPrice(item);
+    }, 0);
+});
+
+const quantityIncrement = (item) => {
+    item.quantity++;
+};
+
+const quantityDecrement = (item) => {
+    if (item.quantity > 1) {
+        item.quantity--;
+    }
+};
+
+const removeItem = (item) => {
+    const index = cartItems.value.indexOf(item);
+    if (index > -1) {
+        cartItems.value.splice(index, 1);
+    }
+};
+
+const addToCart = (product) => {
+    const existingItem = cartItems.value.find((item) => item.id === product.id);
+    if (existingItem) {
+        existingItem.quantity++;
+    } else {
+        cartItems.value.push({ ...product, quantity: 1 });
+    }
+};
 
 const fetchProducts = async () => {
     try {
         const response = await fetch(
-            `api/pos/products?search=${searchQuery.value}&page=$currentPage.value`
+            `api/pos/products?search=${searchQuery.value}&page={$currentPage.value}`
         );
         if (!response.ok) {
             throw new Error("Network response was not ok");
         }
         const data = await response.json();
-        console.log(data);
+        // console.log(data);
         products.value = data.data;
     } catch (error) {
         console.error("Error fetching products:", error);
@@ -137,7 +251,45 @@ watch(searchQuery, () => {
     }
 });
 
-fetchProducts();
+// order place function
+const placeOrder = async () => {
+    try {
+        const payload = {
+            items: cartItems.value.map((item) => ({
+                product_id: item.id,
+                variation_id: item.variation_id || null,
+                quantity: item.quantity,
+                price: item.selling_price,
+            })),
+            subtotal: subtotalPrice.value,
+            tax: totalTax.value,
+            discount: totalDiscount.value,
+            total: grandTotal.value,
+            customer_name: customerName.value || null,
+            customer_phone: customerPhone.value || null,
+        };
+
+        const response = await fetch("/api/pos/orders", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": document
+                    .querySelector('meta[name="csrf-token"]')
+                    .getAttribute("content"),
+            },
+            body: JSON.stringify(payload),
+        });
+
+        const data = await response.json();
+        console.log("Order Placed:", data);
+    } catch (error) {
+        console.error("Error placing order:", error);
+    }
+};
+
+onMounted(() => {
+    fetchProducts();
+});
 </script>
 
 <style scoped>

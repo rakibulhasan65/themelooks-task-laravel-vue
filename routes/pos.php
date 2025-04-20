@@ -31,4 +31,6 @@ Route::group(['middleware' => ['web']], function () {
 Route::prefix('api/pos')->group(function () {
     Route::get('products', [PosApiController::class, 'getProducts']);
     Route::get('products/{product}', [PosApiController::class, 'getProductDetails']);
+    // place order
+    Route::post('orders', [OrderController::class, 'store'])->name('api.orders.store');
 });
