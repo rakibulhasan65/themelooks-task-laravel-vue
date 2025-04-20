@@ -14,27 +14,42 @@
                         type="text"
                         class="search-input"
                         placeholder="Search products..."
+                        v-model="searchQuery"
                     />
                 </div>
 
                 <!-- Product Grid -->
-                <div class="product-grid">
+                <div class="product-grid" v-if="products.length">
                     <!-- Product 1 -->
-                    <div class="product-card">
+                    <div
+                        class="product-card"
+                        v-for="product in products"
+                        :key="product.id"
+                    >
                         <div class="product-image">
-                            <img
-                                src="/api/placeholder/300/180?text=Apples"
-                                alt="Organic Apples"
-                            />
+                            <img :src="product.image" alt="Organic Apples" />
                         </div>
                         <div class="product-info">
-                            <h3 class="product-name">Organic Apples</h3>
-                            <p class="product-price">৳120.00</p>
+                            <h3 class="product-name">{{ product.name }}</h3>
+                            <p class="product-price">
+                                ৳{{ product.selling_price }}
+                            </p>
                             <button class="btn btn-primary btn-block">
                                 Add to Cart
                             </button>
                         </div>
                     </div>
+                </div>
+
+                <div v-else class="text-center mt-5">
+                    <i class="fas fa-shopping-cart fa-3x"></i>
+                    <p class="mt-2">No products found</p>
+                </div>
+                <div>
+                    <pagination
+                        :data="products"
+                        @pagination-change-page="fetchProducts"
+                    />
                 </div>
             </section>
 
@@ -93,21 +108,34 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, watch, computed } from "vue";
 
 const products = ref([]);
+const searchQuery = ref("");
+const currentPage = ref(1);
 
 const fetchProducts = async () => {
     try {
-        const response = await fetch("api/pos/products");
+        const response = await fetch(
+            `api/pos/products?search=${searchQuery.value}&page=$currentPage.value`
+        );
         if (!response.ok) {
             throw new Error("Network response was not ok");
         }
-        products.value = await response.json();
+        const data = await response.json();
+        console.log(data);
+        products.value = data.data;
     } catch (error) {
         console.error("Error fetching products:", error);
     }
 };
+
+watch(searchQuery, () => {
+    currentPage.value = 1; // Reset to the first page when search query changes
+    if (searchQuery.value.length > 2 || searchQuery.value.length === 0) {
+        fetchProducts();
+    }
+});
 
 fetchProducts();
 </script>

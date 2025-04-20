@@ -11,6 +11,7 @@ class PosApiController extends Controller
     public function getProducts(Request $request)
     {
         $query = Product::with('variations');
+    
         // Filter by name or SKU
         if ($request->has('search')) {
             $search = $request->search;
@@ -20,8 +21,7 @@ class PosApiController extends Controller
             });
         }
         
-        // $products = $query->latest()->paginate(12);
-        $products = $query->latest()->get();
+        $products = $query->latest()->paginate(2);
         
         return response()->json($products);
     }
