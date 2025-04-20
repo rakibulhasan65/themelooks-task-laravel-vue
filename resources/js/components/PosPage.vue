@@ -1,9 +1,15 @@
 <template>
     <div class="container">
         <!-- Main POS Layout -->
+         <div v-if="orderSuccessMessage" class="alert alert-success mb-3 p-3">
+                Order placed successfully!
+            </div>
         <div class="pos-wrapper">
             <!-- Products Section -->
+            
             <section class="product-section">
+                 <!-- order success message -->
+            
                 <div class="section-header">
                     <h2>Product List</h2>
                 </div>
@@ -165,6 +171,7 @@ const currentPage = ref(1);
 const cartItems = ref([]);
 const customerName = ref("");
 const customerPhone = ref("");
+const orderSuccessMessage = ref(false);
 
 const totalPrice = (item) => {
     // Calculate the subtotal price of all items in the cart
@@ -280,8 +287,12 @@ const placeOrder = async () => {
             body: JSON.stringify(payload),
         });
 
-        const data = await response.json();
-        console.log("Order Placed:", data);
+        // const data = await response.json();
+
+        if (response.ok) {
+            orderSuccessMessage.value = true;
+            cartItems.value = []; // Clear the cart after successful order
+        }
     } catch (error) {
         console.error("Error placing order:", error);
     }
