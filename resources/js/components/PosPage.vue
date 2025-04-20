@@ -25,11 +25,14 @@
                 </div>
 
                 <!-- Product Grid -->
-                <div class="product-grid" v-if="products.length">
+                <div
+                    class="product-grid"
+                    v-if="products.data && products.data.length"
+                >
                     <!-- Product 1 -->
                     <div
                         class="product-card"
-                        v-for="product in products"
+                        v-for="product in products.data"
                         :key="product.id"
                     >
                         <div class="product-image">
@@ -65,8 +68,8 @@
                     <i class="fas fa-shopping-cart fa-3x"></i>
                     <p class="mt-2">No products found</p>
                 </div>
-                <div>
-                    <pagination
+                <div v-if="products.data && products.data.length" class="mt-3">
+                    <Pagination
                         :data="products"
                         @pagination-change-page="fetchProducts"
                     />
@@ -183,6 +186,7 @@ const cartItems = ref([]);
 const customerName = ref("");
 const customerPhone = ref("");
 const orderSuccessMessage = ref(false);
+
 const discountPrice = (product) => {
     const price = parseFloat(product.selling_price) || 0;
     const discount = parseFloat(product.discount) || 0;
@@ -286,7 +290,7 @@ const fetchProducts = async () => {
         }
         const data = await response.json();
         // console.log(data);
-        products.value = data.data;
+        products.value = data;
     } catch (error) {
         console.error("Error fetching products:", error);
     }
